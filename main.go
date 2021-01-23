@@ -32,7 +32,7 @@ func main() {
 		log.Print(err.Error())
 		return
 	}
-	pdf.SetX(80 + 35 + 5)
+	pdf.SetX(80 + 35 + 0)
 	pdf.SetY(30)
 	pdf.SetStrokeColor(0, 0, 0)
 	pdf.SetFillColor(0, 0, 0)
@@ -43,10 +43,11 @@ date fixed by the court appealed from, the
 appellant to file a noice of appearl and
 serve it on each person who was a party
 in the proceeding in the court appealed
-from or given leave to intervene.`, 480)
+from or given leave to intervene.`, 150)
 	for i, text := range texts {
 		_ = pdf.Cell(nil, text)
-		pdf.SetY(30.0 + float64(i)*24.0)
+		pdf.SetX(80 + 35 + 0)
+		pdf.SetY(30.0 + float64(i+1)*12.0)
 	}
 
 	err = pdf.WritePdf("hello.pdf")
