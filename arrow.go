@@ -6,19 +6,22 @@ import (
 	"github.com/signintech/gopdf"
 )
 
-func drawArrow(pdf *gopdf.GoPdf, s, e gopdf.Point, c color) {
+func drawArrow(pdf *gopdf.GoPdf, sX, sY, L float64, c color) {
 	pdf.SetStrokeColor(0, 0, 0)
 	pdf.SetFillColor(0, 0, 0)
 
-	pdf.Line(s.X, s.Y, e.X, e.Y)
-	pdf.Polygon(arrowHead(s, e), "DF")
+	pdf.Line(sX, sY, sX+L, sY)
+	pdf.Polygon(arrowHead(gopdf.Point{X: sX, Y: sY}, gopdf.Point{X: sX + L, Y: sY}), "DF")
 
 	// Draw circle
 	pdf.SetLineWidth(1)
 	pdf.SetStrokeColor(c.r, c.g, c.b)
 	pdf.SetFillColor(c.r, c.g, c.b)
-	r := 5.0
-	pdf.Oval(s.X, s.Y-0.5*r, s.X+r, s.Y+0.5*r) // Assume horizontal line for arrow
+	R := 12
+	for r := 1; r < R; r++ {
+		pdf.Oval(sX, sY-0.5*float64(r), sX+float64(r), sY+0.5*float64(r)) // Assume horizontal line for arrow
+	}
+
 }
 
 // https://math.stackexchange.com/questions/1314006/drawing-an-arrow
