@@ -10,5 +10,5 @@ func drawBarrier(pdf *gopdf.GoPdf, pageSize gopdf.Rect) {
 
 	pdf.SetLineWidth(thick)
 	pdf.SetStrokeColor(177, 178, 177)
-	pdf.Line(pageSize.W/2.0, 30, pageSize.W/2.0, 300)
+	pdf.Line(pageSize.W/2.0, (pageSize.H/20.0)*3.0, pageSize.W/2.0, (pageSize.H/20.0)*19.0)
 }

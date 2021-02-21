@@ -14,13 +14,8 @@ func drawArrow(pdf *gopdf.GoPdf, sX, sY, L float64, c color) {
 	pdf.Polygon(arrowHead(gopdf.Point{X: sX, Y: sY}, gopdf.Point{X: sX + L, Y: sY}), "DF")
 
 	// Draw circle
-	pdf.SetLineWidth(1)
-	pdf.SetStrokeColor(c.r, c.g, c.b)
-	pdf.SetFillColor(c.r, c.g, c.b)
-	R := 12
-	for r := 1; r < R; r++ {
-		pdf.Oval(sX, sY-0.5*float64(r), sX+float64(r), sY+0.5*float64(r)) // Assume horizontal line for arrow
-	}
+	r := 12
+	drawCircle(pdf, sX, sY, r, c)
 
 }
 
@@ -44,4 +39,15 @@ func arrowHead(s, e gopdf.Point) []gopdf.Point { //}   (gopdf.Point, gopdf.Point
 	y4 := y2 + (L2/L1)*(dy*math.Cos(𝜃)+dx*math.Sin(𝜃))
 
 	return []gopdf.Point{e, gopdf.Point{X: x3, Y: y3}, gopdf.Point{X: x4, Y: y4}}
+}
+
+func drawCircle(pdf *gopdf.GoPdf, sX, sY float64, R int, c color) {
+	pdf.SetLineWidth(1)
+	pdf.SetStrokeColor(c.r, c.g, c.b)
+	pdf.SetFillColor(c.r, c.g, c.b)
+
+	// R := 12
+	for r := 1; r < R; r++ {
+		pdf.Oval(sX, sY-0.5*float64(r), sX+float64(r), sY+0.5*float64(r)) // Assume horizontal line for arrow
+	}
 }

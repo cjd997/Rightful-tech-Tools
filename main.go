@@ -22,12 +22,16 @@ func appealsCreate(w http.ResponseWriter, r *http.Request) {
 
 	// Do something with the Person struct...
 	fmt.Fprintf(w, "Datas: %+v", d)
+
+	createAppealsPdf(&d)
+
 }
 
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/appeals", appealsCreate)
 
+	fmt.Println("web server running on port 4000.")
 	err := http.ListenAndServe(":4000", mux)
 	log.Fatal(err)
 }
