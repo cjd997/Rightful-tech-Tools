@@ -17,7 +17,13 @@ func createAppealsPdf(d *Datas) {
 	pdf.AddPage()
 
 	// draw barrier
-	drawBarrier(pdf, *pageSize)
+	b := Barrier{Thick: 17.0,
+		Color:   color{177, 178, 177},
+		TopX:    pageSize.W / 2.0,
+		TopY:    (pageSize.H / 20.0) * 3.0,
+		BottomX: pageSize.W / 2.0,
+		BottomY: (pageSize.H / 20.0) * 19.0}
+	b.DrawBarrier(pdf)
 
 	// write title
 	writeTitle(pdf, *pageSize, title)
@@ -27,7 +33,7 @@ func createAppealsPdf(d *Datas) {
 	writeSubTitle(pdf, *pageSize, subTitleArr)
 
 	// write data to pdf
-	writeData(pdf, *pageSize, d)
+	writeData(pdf, *pageSize, d, b)
 
 	//  write pdf file
 	err := pdf.WritePdf(fileName)
@@ -90,7 +96,7 @@ func writeSubTitle(pdf *gopdf.GoPdf, pageSize gopdf.Rect, title [3]string) {
 	_ = pdf.Cell(nil, cost)
 }
 
-func writeData(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *Datas) {
+func writeData(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *Datas, b Barrier) {
 	// setup family font
 	err := pdf.AddTTFFont(font("Poppins", "Poppins-Regular"))
 	if err != nil {
@@ -106,12 +112,12 @@ func writeData(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *Datas) {
 	}
 
 	// setup position for left data
-	leftDataXPos := (pageSize.W / 10.0) * 1.0
-	leftDataYPos := (pageSize.H / 20.0) * 3.0 // same as barrier data top position
+	leftDataXPos := b.TopX - (b.Thick / 2.0) //(pageSize.W / 10.0) * 1.0
+	leftDataYPos := b.TopY                   //(pageSize.H / 20.0) * 3.0 // same as barrier data top position
 
 	// setup position for right data
-	rightDataXPos := (pageSize.W / 2.0) + 17.0 + 35.0 // 17.0 is barrier width
-	rightDataYPos := (pageSize.H / 20.0) * 3.0        // same as barrier data top position
+	rightDataXPos := b.TopX + (b.Thick / 2.0) //(pageSize.W / 2.0) + 17.0 + 35.0 // 17.0 is barrier width
+	rightDataYPos := b.TopY                   //(pageSize.H / 20.0) * 3.0        // same as barrier data top position
 
 	// text color
 	pdf.SetTextColor(0, 0, 0)
@@ -119,22 +125,19 @@ func writeData(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *Datas) {
 	for _, dItem := range *d {
 		if dItem.Direction == Left {
 			leftDataXPos, leftDataYPos = writeDataOnLeft(pdf, pageSize, &dItem, leftDataXPos, leftDataYPos)
-
 		} else {
 			rightDataXPos, rightDataYPos = writeDataOnRight(pdf, pageSize, &dItem, rightDataXPos, rightDataYPos)
-
 		}
 	}
 
 }
 
 func writeDataOnRight(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x float64, y float64) (nextX float64, nextY float64) {
-
 	// draw arrow
-	drawArrow(pdf, x, y, -35, color{255, 0, 0})
+	drawToLeftArrow(pdf, x+35, y, -35, color{255, 0, 0})
 
 	// write text data
-	xText := x + 18.0
+	xText := x + 35.0 + 12.0 // 35.0 is length of arrow, and 12.0 is radian on circle arrow
 	yText := y - 18.0
 	pdf.SetX(xText)
 	texts, _ := pdf.SplitText(d.Text, 150)
@@ -153,14 +156,16 @@ func writeDataOnRight(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x flo
 
 func writeDataOnLeft(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x float64, y float64) (nextX float64, nextY float64) {
 	// draw arrow
-	drawArrow(pdf, x, y, -35, color{255, 0, 0})
+	drawToRightArrow(pdf, x, y, -35, color{255, 0, 0})
 
 	// write text data
-	pdf.SetX(x)
+	xText := x - 35.0 - 12.0 - 150.0
+	yText := y - 18.0
+	pdf.SetX(xText) // 35 is length of arrow, and 12 is rad of circle arraow)
 	texts, _ := pdf.SplitText(d.Text, 150)
 	for i, text := range texts {
-		pdf.SetX(x)
-		pdf.SetY(y + float64(i+1)*10.0)
+		pdf.SetX(xText)
+		pdf.SetY(yText + float64(i+1)*10.0)
 		_ = pdf.Cell(nil, text)
 	}
 
