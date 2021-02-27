@@ -1,9 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/signintech/gopdf"
+)
+
+var (
+	pink  color = color{255, 187, 177}
+	blue  color = color{178, 214, 239}
+	grey  color = color{153, 153, 153}
+	black color = color{0, 0, 0}
+	white color = color{255, 255, 255}
 )
 
 func createAppealsPdf(d *Datas) {
@@ -18,7 +27,7 @@ func createAppealsPdf(d *Datas) {
 
 	// draw barrier
 	b := Barrier{Thick: 17.0,
-		Color:   color{177, 178, 177},
+		Color:   grey,
 		TopX:    pageSize.W / 2.0,
 		TopY:    (pageSize.H / 20.0) * 3.0,
 		BottomX: pageSize.W / 2.0,
@@ -32,14 +41,74 @@ func createAppealsPdf(d *Datas) {
 	subTitleArr := [3]string{"CLIENT / SOLICITOR", "BARRISTER", "FIXED COST PER ACTIVITY"}
 	writeSubTitle(pdf, *pageSize, subTitleArr)
 
+	// write initial client consultation
+	writeInitClientC(pdf, b)
+
+	// write hearing of appeal
+	writeHearingOfAppeal(pdf, b)
+
 	// write data to pdf
 	writeData(pdf, *pageSize, d, b)
+
+	// write high level visual
+	highLevelXPos := b.BottomX + (b.Thick / 2.0) //(pageSize.W / 2.0) + 17.0 + 35.0 // 17.0 is barrier width
+	highLevelYPos := b.BottomY                   //(pageSize.H / 20.0) * 3.0        // same as barrier data top position
+	writeHighLevelVisual(pdf, *pageSize, highLevelXPos, highLevelYPos)
+
+	// write key block
+	writeKeyBlock(pdf, b)
 
 	//  write pdf file
 	err := pdf.WritePdf(fileName)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func writeInitClientC(pdf *gopdf.GoPdf, b Barrier) {
+	// draw left and right curved rectangle
+	leftRect := Rectangle{fillColor: pink,
+		strokeColor: pink,
+		tlPoint:     gopdf.Point{X: b.TopX - 34, Y: b.TopY - 34},
+		trPoint:     gopdf.Point{X: b.TopX, Y: b.TopY - 34},
+		brPoint:     gopdf.Point{X: b.TopX, Y: b.TopY},
+		blPoint:     gopdf.Point{X: b.TopX - 34, Y: b.TopY}}
+	leftCurvedRectangle := CurvedRectangle{rectangle: leftRect, curveLength: 20.0}
+	leftCurvedRectangle.DrawLeftCurved(pdf)
+
+	rightRect := Rectangle{fillColor: blue,
+		strokeColor: blue,
+		tlPoint:     gopdf.Point{X: b.TopX + 34, Y: b.TopY - 34},
+		trPoint:     gopdf.Point{X: b.TopX, Y: b.TopY - 34},
+		brPoint:     gopdf.Point{X: b.TopX, Y: b.TopY},
+		blPoint:     gopdf.Point{X: b.TopX + 34, Y: b.TopY}}
+	rightCurvedRectangle := CurvedRectangle{rectangle: rightRect, curveLength: 20.0}
+	rightCurvedRectangle.DrawRightCurved(pdf)
+
+	// TODO: right text initial client consultation
+}
+
+func writeHearingOfAppeal(pdf *gopdf.GoPdf, b Barrier) {
+	// draw left and right curved rectangle
+	leftRect := Rectangle{fillColor: pink,
+		strokeColor: pink,
+		tlPoint:     gopdf.Point{X: b.BottomX - 34, Y: b.BottomY - 68},
+		trPoint:     gopdf.Point{X: b.BottomX, Y: b.BottomY - 68},
+		brPoint:     gopdf.Point{X: b.BottomX, Y: b.BottomY - 34},
+		blPoint:     gopdf.Point{X: b.BottomX - 34, Y: b.BottomY - 34}}
+	leftCurvedRectangle := CurvedRectangle{rectangle: leftRect, curveLength: 20.0}
+	leftCurvedRectangle.DrawLeftCurved(pdf)
+
+	rightRect := Rectangle{fillColor: blue,
+		strokeColor: blue,
+		tlPoint:     gopdf.Point{X: b.BottomX + 34, Y: b.BottomY - 68},
+		trPoint:     gopdf.Point{X: b.BottomX, Y: b.BottomY - 68},
+		brPoint:     gopdf.Point{X: b.BottomX, Y: b.BottomY - 34},
+		blPoint:     gopdf.Point{X: b.BottomX + 34, Y: b.BottomY - 34}}
+	rightCurvedRectangle := CurvedRectangle{rectangle: rightRect, curveLength: 20.0}
+	rightCurvedRectangle.DrawRightCurved(pdf)
+
+	// TODO: right text hearing of appeals
 }
 
 func writeTitle(pdf *gopdf.GoPdf, pageSize gopdf.Rect, title string) {
@@ -91,9 +160,10 @@ func writeSubTitle(pdf *gopdf.GoPdf, pageSize gopdf.Rect, title [3]string) {
 
 	// write sub title FIXED COST PER ACTIVITY
 	cost := title[2]
-	pdf.SetX((pageSize.W / 10.0) * 7.0)
+	pdf.SetX(((pageSize.W / 10.0) * 8.0) - 12.0)
 	pdf.SetY(subTitleY)
 	_ = pdf.Cell(nil, cost)
+
 }
 
 func writeData(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *Datas, b Barrier) {
@@ -113,20 +183,22 @@ func writeData(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *Datas, b Barrier) {
 
 	// setup position for left data
 	leftDataXPos := b.TopX - (b.Thick / 2.0) //(pageSize.W / 10.0) * 1.0
-	leftDataYPos := b.TopY                   //(pageSize.H / 20.0) * 3.0 // same as barrier data top position
+	//leftDataYPos := b.TopY                   //(pageSize.H / 20.0) * 3.0 // same as barrier data top position
 
 	// setup position for right data
 	rightDataXPos := b.TopX + (b.Thick / 2.0) //(pageSize.W / 2.0) + 17.0 + 35.0 // 17.0 is barrier width
-	rightDataYPos := b.TopY                   //(pageSize.H / 20.0) * 3.0        // same as barrier data top position
+	//rightDataYPos := b.TopY                   //(pageSize.H / 20.0) * 3.0        // same as barrier data top position
+
+	dataYPos := b.TopY + 12.0
 
 	// text color
 	pdf.SetTextColor(0, 0, 0)
 
 	for _, dItem := range *d {
 		if dItem.Direction == Left {
-			leftDataXPos, leftDataYPos = writeDataOnLeft(pdf, pageSize, &dItem, leftDataXPos, leftDataYPos)
+			leftDataXPos, dataYPos = writeDataOnLeft(pdf, pageSize, &dItem, leftDataXPos, dataYPos)
 		} else {
-			rightDataXPos, rightDataYPos = writeDataOnRight(pdf, pageSize, &dItem, rightDataXPos, rightDataYPos)
+			rightDataXPos, dataYPos = writeDataOnRight(pdf, pageSize, &dItem, rightDataXPos, dataYPos)
 		}
 	}
 
@@ -134,7 +206,7 @@ func writeData(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *Datas, b Barrier) {
 
 func writeDataOnRight(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x float64, y float64) (nextX float64, nextY float64) {
 	// draw arrow
-	drawToLeftArrow(pdf, x+35, y, -35, color{255, 0, 0})
+	drawToLeftArrow(pdf, x+35, y, -35, pink, 12)
 
 	// write text data
 	xText := x + 35.0 + 12.0 // 35.0 is length of arrow, and 12.0 is radian on circle arrow
@@ -148,6 +220,21 @@ func writeDataOnRight(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x flo
 	}
 
 	// draw cost rectangle
+	xCost := xText + 150.0 + 35.0 // 150.0 is length of text data, adn 35.0 is length of arrow
+	yCost := yText + 12.0
+
+	pdf.SetStrokeColor(black.r, black.g, black.b)
+	pdf.SetFillColor(white.r, white.g, white.b)
+	pdf.Polygon([]gopdf.Point{
+		{X: xCost - 10, Y: yCost - 5.0},
+		{X: xCost - 10 + 60, Y: yCost - 5.0},
+		{X: xCost - 10 + 60, Y: yCost + 5.0 + 12.0},
+		{X: xCost - 10, Y: yCost + 5.0 + 12.0}}, "DF")
+
+	pdf.SetX(xCost)
+	pdf.SetY(yCost)
+	_ = pdf.Cell(nil, "$"+fmt.Sprintf("%.2f", d.Cost))
+
 	nextX = x
 	nextY = y + (float64(len(texts)) * 10.0) + 20.0
 	return nextX, nextY
@@ -156,7 +243,7 @@ func writeDataOnRight(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x flo
 
 func writeDataOnLeft(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x float64, y float64) (nextX float64, nextY float64) {
 	// draw arrow
-	drawToRightArrow(pdf, x, y, -35, color{255, 0, 0})
+	drawToRightArrow(pdf, x, y, -35, pink, 12)
 
 	// write text data
 	xText := x - 35.0 - 12.0 - 150.0
@@ -169,59 +256,64 @@ func writeDataOnLeft(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x floa
 		_ = pdf.Cell(nil, text)
 	}
 
-	// draw cost rectangle
 	nextX = x
 	nextY = y + (float64(len(texts)) * 10.0) + 20.0
 	return nextX, nextY
 }
 
-// func createAppealsPdf(d *Datas) {
-// 	fileName := "appeals.pdf"
+func writeHighLevelVisual(pdf *gopdf.GoPdf, pageSize gopdf.Rect, x float64, y float64) {
+	texts := [4]string{"* Highlevel visual ret. of", "process. Activities can", "change based on a", "case by case basis."}
 
-// 	pageSize := gopdf.PageSizeA4
+	// draw arrow
+	drawToLeftArrow(pdf, x+45, y, -45, grey, 36)
 
-// 	pdf := &gopdf.GoPdf{}
-// 	pdf.Start(gopdf.Config{PageSize: *pageSize})
-// 	pdf.AddPage()
+	// write text data
+	xText := x + 45.0 + 36.0 // 45.0 is length of arrow, and 36.0 is radian on circle arrow
+	yText := y - 18.0
+	pdf.SetX(xText)
+	//texts, _ := pdf.SplitText(d.Text, 150)
+	for i, text := range texts {
+		pdf.SetX(xText)
+		pdf.SetY(yText + float64(i+1)*10.0)
+		_ = pdf.Cell(nil, text)
+	}
 
-// 	// Draw Arrow
-// 	drawArrow(pdf, 80, 30, -35, color{255, 0, 0})
+}
 
-// 	// Draw barrier (vertical rectangle)
-// 	drawBarrier(pdf, *pageSize)
+func writeKeyBlock(pdf *gopdf.GoPdf, b Barrier) {
 
-// 	// Draw text
-// 	err := pdf.AddTTFFont(font("Poppins", "Poppins-Regular"))
-// 	if err != nil {
-// 		log.Print(err.Error())
-// 		return
-// 	}
+	// draw cost rectangle
+	xKey := b.BottomX - 150.0 - 35.0 - 35.0 // 150.0 is length of text data, adn 35.0 is length of arrow
+	yKey := b.BottomY
 
-// 	err = pdf.SetFont("Poppins", "", 10)
-// 	if err != nil {
-// 		log.Print(err.Error())
-// 		return
-// 	}
-// 	pdf.SetX(80 + 35 + 0)
-// 	pdf.SetY(30)
-// 	pdf.SetStrokeColor(0, 0, 0)
-// 	pdf.SetFillColor(0, 0, 0)
+	pdf.SetStrokeColor(black.r, black.g, black.b)
+	pdf.SetFillColor(white.r, white.g, white.b)
+	pdf.Polygon([]gopdf.Point{
+		{X: xKey, Y: yKey - 57.0},
+		{X: xKey + 150.0, Y: yKey - 57.0},
+		{X: xKey + 150.0, Y: yKey + 19.0},
+		{X: xKey, Y: yKey + 19.0}}, "DF")
 
-// 	texts, _ := pdf.SplitText(`Within 21 days after date judgment
-// pronounced or leave granted, or by the
-// date fixed by the court appealed from, the
-// appellant to file a noice of appearl and
-// serve it on each person who was a party
-// in the proceeding in the court appealed
-// from or given leave to intervene.`, 150)
-// 	for i, text := range texts {
-// 		_ = pdf.Cell(nil, text)
-// 		pdf.SetX(80 + 35 + 0)
-// 		pdf.SetY(30.0 + float64(i+1)*12.0)
-// 	}
+	keyTextX := xKey + 35.0
+	keyTextY := yKey - 57.0 + 12.0
+	pdf.SetX(xKey)
+	pdf.SetY(yKey)
+	_ = pdf.Cell(nil, "KEY")
 
-// 	err = pdf.WritePdf(fileName)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
+	pdf.SetX(keyTextX + 48.0)
+	pdf.SetY(keyTextY + 24.0)
+	_ = pdf.Cell(nil, "BARRISTER ACTIVITY")
+
+	pdf.SetX(keyTextX + 48.0)
+	pdf.SetY(keyTextY + (24.0 * 2))
+	_ = pdf.Cell(nil, "CLIENT/SOLICITOR ACTIVITY")
+
+	pdf.SetX(keyTextX + 48.0)
+	pdf.SetY(keyTextY + (24.0 * 3))
+	_ = pdf.Cell(nil, "JOINT/COLLABORATION")
+
+	pdf.SetX(keyTextX + 48.0 + 12.0)
+	pdf.SetY(keyTextY + (24.0 * 3) + 12.0)
+	_ = pdf.Cell(nil, "ACTIVITY")
+
+}
