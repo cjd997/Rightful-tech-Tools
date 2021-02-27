@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	//	"github.com/signintech/gopdf"
+	"os"
 )
 
 func appealsCreate(w http.ResponseWriter, r *http.Request) {
@@ -20,68 +22,39 @@ func appealsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Do something with the Person struct...
-	fmt.Fprintf(w, "Datas: %+v", d)
+	// write json data to Datas struct
+	//fmt.Fprintf(w, "Datas: %+v", d)
 
-	createAppealsPdf(&d)
+	pdfFileName := createAppealsPdf(&d)
+
+	// read pdf generated file and serve to client as response
+	serveAppealsPdfFile(pdfFileName, w)
+}
+
+func serveAppealsPdfFile(pdfFileName string, w http.ResponseWriter) {
+	streamPDFbytes, err := ioutil.ReadFile(pdfFileName)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	b := bytes.NewBuffer(streamPDFbytes)
+
+	w.Header().Set("Content-type", "application/pdf")
+
+	if _, err := b.WriteTo(w); err != nil {
+		fmt.Fprintf(w, "%s", err)
+	}
 
 }
 
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/appeals", appealsCreate)
+	mux.HandleFunc("/", appealsCreate)
 
 	fmt.Println("web server running on port 4000.")
 	err := http.ListenAndServe(":4000", mux)
 	log.Fatal(err)
 }
-
-// func main() {
-
-// 	pageSize := gopdf.PageSizeA4
-
-// 	pdf := &gopdf.GoPdf{}
-// 	pdf.Start(gopdf.Config{PageSize: *pageSize})
-// 	pdf.AddPage()
-
-// 	// Draw Arrow
-// 	drawArrow(pdf, 80, 30, -35, color{255, 0, 0})
-
-// 	// Draw barrier (vertical rectangle)
-// 	drawBarrier(pdf, *pageSize)
-
-// 	// Draw text
-// 	err := pdf.AddTTFFont(font("Poppins", "Poppins-Regular"))
-// 	if err != nil {
-// 		log.Print(err.Error())
-// 		return
-// 	}
-
-// 	err = pdf.SetFont("Poppins", "", 10)
-// 	if err != nil {
-// 		log.Print(err.Error())
-// 		return
-// 	}
-// 	pdf.SetX(80 + 35 + 0)
-// 	pdf.SetY(30)
-// 	pdf.SetStrokeColor(0, 0, 0)
-// 	pdf.SetFillColor(0, 0, 0)
-
-// 	texts, _ := pdf.SplitText(`Within 21 days after date judgment
-// pronounced or leave granted, or by the
-// date fixed by the court appealed from, the
-// appellant to file a noice of appearl and
-// serve it on each person who was a party
-// in the proceeding in the court appealed
-// from or given leave to intervene.`, 150)
-// 	for i, text := range texts {
-// 		_ = pdf.Cell(nil, text)
-// 		pdf.SetX(80 + 35 + 0)
-// 		pdf.SetY(30.0 + float64(i+1)*12.0)
-// 	}
-
-// 	err = pdf.WritePdf("hello.pdf")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }

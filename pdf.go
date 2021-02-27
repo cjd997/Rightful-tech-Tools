@@ -15,7 +15,7 @@ var (
 	white color = color{255, 255, 255}
 )
 
-func createAppealsPdf(d *Datas) {
+func createAppealsPdf(d *Datas) (pdfFileName string) {
 	fileName := "appeals.pdf"
 	title := "APPEALS: APPELLANT"
 
@@ -63,6 +63,8 @@ func createAppealsPdf(d *Datas) {
 	if err != nil {
 		panic(err)
 	}
+
+	return fileName
 }
 
 func writeInitClientC(pdf *gopdf.GoPdf, b Barrier) {
