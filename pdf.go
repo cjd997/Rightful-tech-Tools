@@ -85,7 +85,25 @@ func writeInitClientC(pdf *gopdf.GoPdf, b Barrier) {
 	rightCurvedRectangle := CurvedRectangle{rectangle: rightRect, curveLength: 20.0}
 	rightCurvedRectangle.DrawRightCurved(pdf)
 
-	// TODO: right text initial client consultation
+	// write text initial client consultation
+	pdf.SetX(b.TopX - 16.0)
+	pdf.SetY(b.TopY - 34.0)
+	pdf.SetTextColor(white.r, white.g, white.b)
+	_ = pdf.Cell(nil, "INITIAL")
+
+	pdf.SetX(b.TopX - 16.0)
+	pdf.SetY(b.TopY - 24.0)
+	pdf.SetTextColor(white.r, white.g, white.b)
+	_ = pdf.Cell(nil, "CLIENT")
+
+	pdf.SetX(b.TopX - 38.0)
+	pdf.SetY(b.TopY - 14.0)
+	pdf.SetTextColor(white.r, white.g, white.b)
+	_ = pdf.Cell(nil, "CONSULTATION")
+
+	// set back text color to black
+	pdf.SetTextColor(black.r, black.g, black.b)
+
 }
 
 func writeHearingOfAppeal(pdf *gopdf.GoPdf, b Barrier) {
@@ -108,7 +126,19 @@ func writeHearingOfAppeal(pdf *gopdf.GoPdf, b Barrier) {
 	rightCurvedRectangle := CurvedRectangle{rectangle: rightRect, curveLength: 20.0}
 	rightCurvedRectangle.DrawRightCurved(pdf)
 
-	// TODO: right text hearing of appeals
+	// write text hearing of appeals
+	pdf.SetX(b.BottomX - 28.0)
+	pdf.SetY(b.BottomY - 65.0)
+	pdf.SetTextColor(white.r, white.g, white.b)
+	_ = pdf.Cell(nil, "HEARING OF")
+
+	pdf.SetX(b.BottomX - 20.0)
+	pdf.SetY(b.BottomY - 52.0)
+	pdf.SetTextColor(white.r, white.g, white.b)
+	_ = pdf.Cell(nil, "APPEALS")
+
+	// set back text color to black
+	pdf.SetTextColor(black.r, black.g, black.b)
 }
 
 func writeTitle(pdf *gopdf.GoPdf, pageSize gopdf.Rect, title string) {
