@@ -268,7 +268,7 @@ func writeHighLevelVisual(pdf *gopdf.GoPdf, pageSize gopdf.Rect, x float64, y fl
 	drawToLeftArrow(pdf, x+45, y, -45, grey, 36)
 
 	// write text data
-	xText := x + 45.0 + 36.0 // 45.0 is length of arrow, and 36.0 is radian on circle arrow
+	xText := x + 45.0 + 36.0 + 12.0 // 45.0 is length of arrow, and 36.0 is radian on circle arrow
 	yText := y - 18.0
 	pdf.SetX(xText)
 	//texts, _ := pdf.SplitText(d.Text, 150)
@@ -281,39 +281,70 @@ func writeHighLevelVisual(pdf *gopdf.GoPdf, pageSize gopdf.Rect, x float64, y fl
 }
 
 func writeKeyBlock(pdf *gopdf.GoPdf, b Barrier) {
+	// draw outer rectangle
+	rectUpperLeftX := b.BottomX - 250.0
+	rectUpperLeftY := b.BottomY - 65.0
+	rectWidth := 180.0
+	rectHeight := 90.0
 
-	// draw cost rectangle
-	xKey := b.BottomX - 150.0 - 35.0 - 35.0 // 150.0 is length of text data, adn 35.0 is length of arrow
-	yKey := b.BottomY
-
+	pdf.SetLineWidth(1.0)
 	pdf.SetStrokeColor(black.r, black.g, black.b)
-	pdf.SetFillColor(white.r, white.g, white.b)
-	pdf.Polygon([]gopdf.Point{
-		{X: xKey, Y: yKey - 57.0},
-		{X: xKey + 150.0, Y: yKey - 57.0},
-		{X: xKey + 150.0, Y: yKey + 19.0},
-		{X: xKey, Y: yKey + 19.0}}, "DF")
+	pdf.RectFromUpperLeft(rectUpperLeftX, rectUpperLeftY, rectWidth, rectHeight)
 
-	keyTextX := xKey + 35.0
-	keyTextY := yKey - 57.0 + 12.0
-	pdf.SetX(xKey)
-	pdf.SetY(yKey)
+	// draw KEY text
+	keyTextX := rectUpperLeftX + 17.0
+	keyTextY := rectUpperLeftY + 6.0
+	pdf.SetX(keyTextX)
+	pdf.SetY(keyTextY)
 	_ = pdf.Cell(nil, "KEY")
 
-	pdf.SetX(keyTextX + 48.0)
-	pdf.SetY(keyTextY + 24.0)
+	// draw blue circle
+	blueCircleX := keyTextX
+	blueCircleY := keyTextY + 24.0
+	drawCircle(pdf, blueCircleX, blueCircleY, 12.0, blue)
+
+	// draw pink circle
+	redCircleX := blueCircleX
+	redCircleY := blueCircleY + 18.0
+	drawCircle(pdf, redCircleX, redCircleY, 12.0, pink)
+
+	// draw left and right curved rectangle
+	leftRect := Rectangle{fillColor: pink,
+		strokeColor: pink,
+		tlPoint:     gopdf.Point{X: redCircleX, Y: redCircleY + 18.0},
+		trPoint:     gopdf.Point{X: redCircleX + 6.0, Y: redCircleY + 18.0},
+		brPoint:     gopdf.Point{X: redCircleX + 6.0, Y: redCircleY + 27.0},
+		blPoint:     gopdf.Point{X: redCircleX, Y: redCircleY + 27.0}}
+	leftCurvedRectangle := CurvedRectangle{rectangle: leftRect, curveLength: 5.0}
+	leftCurvedRectangle.DrawLeftCurved(pdf)
+
+	rightRect := Rectangle{fillColor: blue,
+		strokeColor: blue,
+		tlPoint:     gopdf.Point{X: redCircleX + 12.0, Y: redCircleY + 18.0},
+		trPoint:     gopdf.Point{X: redCircleX + 6.0, Y: redCircleY + 18.0},
+		brPoint:     gopdf.Point{X: redCircleX + 6.0, Y: redCircleY + 27.0},
+		blPoint:     gopdf.Point{X: redCircleX + 12.0, Y: redCircleY + 27.0}}
+
+	rightCurvedRectangle := CurvedRectangle{rectangle: rightRect, curveLength: 5.0}
+	rightCurvedRectangle.DrawRightCurved(pdf)
+
+	// write BARRISTER ACTIVITY text
+	pdf.SetX(blueCircleX + 24.0)
+	pdf.SetY(blueCircleY - 6.0)
 	_ = pdf.Cell(nil, "BARRISTER ACTIVITY")
 
-	pdf.SetX(keyTextX + 48.0)
-	pdf.SetY(keyTextY + (24.0 * 2))
+	// write CLIENT/SOLICITOR ACTIVITY text
+	pdf.SetX(redCircleX + 24.0)
+	pdf.SetY(redCircleY - 6.0)
 	_ = pdf.Cell(nil, "CLIENT/SOLICITOR ACTIVITY")
 
-	pdf.SetX(keyTextX + 48.0)
-	pdf.SetY(keyTextY + (24.0 * 3))
-	_ = pdf.Cell(nil, "JOINT/COLLABORATION")
+	// write JOINT COLLABORATION ACTIVITY text
+	pdf.SetX(redCircleX + 24.0)
+	pdf.SetY(redCircleY + 12.0)
+	_ = pdf.Cell(nil, "JOINT COLLABORATION")
 
-	pdf.SetX(keyTextX + 48.0 + 12.0)
-	pdf.SetY(keyTextY + (24.0 * 3) + 12.0)
+	pdf.SetX(redCircleX + 24.0 + 32.0)
+	pdf.SetY(redCircleY + 24.0)
 	_ = pdf.Cell(nil, "ACTIVITY")
 
 }
