@@ -238,7 +238,7 @@ func writeData(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *Datas, b Barrier) {
 
 func writeDataOnRight(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x float64, y float64) (nextX float64, nextY float64) {
 	// draw arrow
-	drawToLeftArrow(pdf, x+35, y, -35, pink, 12)
+	drawToLeftArrow(pdf, x+35, y, -35, blue, 12)
 
 	// write text data
 	xText := x + 35.0 + 12.0 // 35.0 is length of arrow, and 12.0 is radian on circle arrow
