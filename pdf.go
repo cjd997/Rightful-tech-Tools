@@ -255,14 +255,47 @@ func writeDataOnRight(pdf *gopdf.GoPdf, pageSize gopdf.Rect, d *DatasItem, x flo
 	xCost := xText + 150.0 + 35.0 // 150.0 is length of text data, adn 35.0 is length of arrow
 	yCost := yText + 12.0
 
+	// draw rounded rectangle cost
 	pdf.SetStrokeColor(black.r, black.g, black.b)
-	pdf.SetFillColor(white.r, white.g, white.b)
-	pdf.Polygon([]gopdf.Point{
-		{X: xCost - 10, Y: yCost - 5.0},
-		{X: xCost - 10 + 60, Y: yCost - 5.0},
-		{X: xCost - 10 + 60, Y: yCost + 5.0 + 12.0},
-		{X: xCost - 10, Y: yCost + 5.0 + 12.0}}, "DF")
+	r := 2.0
+	topLinePoints := [2]gopdf.Point{{X: (xCost - 10) + r, Y: yCost - 5.0}, {X: (xCost - 10 + 60) - r, Y: yCost - 5.0}}
+	rightLinePoints := [2]gopdf.Point{{X: (xCost - 10 + 60), Y: (yCost - 5.0) + r}, {X: xCost - 10 + 60, Y: (yCost + 5.0 + 12.0) - r}}
+	btmLinePoints := [2]gopdf.Point{{X: (xCost - 10 + 60) - r, Y: (yCost + 5.0 + 12.0)}, {X: (xCost - 10) + r, Y: yCost + 5.0 + 12.0}}
+	leftLinePoints := [2]gopdf.Point{{X: (xCost - 10), Y: (yCost + 5.0 + 12.0) - r}, {X: (xCost - 10), Y: (yCost - 5.0) + r}}
 
+	pdf.Line(topLinePoints[0].X, topLinePoints[0].Y, topLinePoints[1].X, topLinePoints[1].Y)
+	pdf.Curve(
+		topLinePoints[1].X, topLinePoints[1].Y, // start point
+		rightLinePoints[0].X, rightLinePoints[0].Y-(r/2), // control point 1
+		topLinePoints[1].X+(r/2), topLinePoints[1].Y, // control point 2
+		rightLinePoints[0].X, rightLinePoints[0].Y, // end point
+		"DF")
+
+	pdf.Line(rightLinePoints[0].X, rightLinePoints[0].Y, rightLinePoints[1].X, rightLinePoints[1].Y)
+	pdf.Curve(
+		rightLinePoints[1].X, rightLinePoints[1].Y, // start point
+		btmLinePoints[0].X, btmLinePoints[0].Y-(r/2), // control point 1
+		rightLinePoints[1].X+(r/2), rightLinePoints[1].Y, // control point 2
+		btmLinePoints[0].X, btmLinePoints[0].Y, // end point
+		"DF")
+
+	pdf.Line(btmLinePoints[0].X, btmLinePoints[0].Y, btmLinePoints[1].X, btmLinePoints[1].Y)
+	pdf.Curve(
+		btmLinePoints[1].X, btmLinePoints[1].Y, // start point
+		leftLinePoints[0].X, leftLinePoints[0].Y+(r/2), // control point 1
+		btmLinePoints[1].X-(r/2), btmLinePoints[1].Y, // control point 2
+		leftLinePoints[0].X, leftLinePoints[0].Y, // end point
+		"DF")
+
+	pdf.Line(leftLinePoints[0].X, leftLinePoints[0].Y, leftLinePoints[1].X, leftLinePoints[1].Y)
+	pdf.Curve(
+		leftLinePoints[1].X, leftLinePoints[1].Y, // start point
+		topLinePoints[0].X, topLinePoints[0].Y+(r/2), // control point 1
+		leftLinePoints[1].X-(r/2), leftLinePoints[1].Y, // control point 2
+		topLinePoints[0].X, topLinePoints[0].Y, // end point
+		"DF")
+
+	// write cost text
 	pdf.SetX(xCost)
 	pdf.SetY(yCost)
 	_ = pdf.Cell(nil, "$"+fmt.Sprintf("%.2f", d.Cost))
