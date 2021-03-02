@@ -6,21 +6,32 @@ import (
 	"github.com/signintech/gopdf"
 )
 
-func drawArrow(pdf *gopdf.GoPdf, sX, sY, L float64, c color) {
-	pdf.SetStrokeColor(0, 0, 0)
-	pdf.SetFillColor(0, 0, 0)
+func drawToLeftArrow(pdf *gopdf.GoPdf, sX, sY, L float64, c color, r int) {
+	pdf.SetLineWidth(1.0)
+	pdf.SetStrokeColor(black.r, black.g, black.b)
+	pdf.SetFillColor(black.r, black.g, black.b)
 
 	pdf.Line(sX, sY, sX+L, sY)
 	pdf.Polygon(arrowHead(gopdf.Point{X: sX, Y: sY}, gopdf.Point{X: sX + L, Y: sY}), "DF")
 
 	// Draw circle
-	pdf.SetLineWidth(1)
-	pdf.SetStrokeColor(c.r, c.g, c.b)
-	pdf.SetFillColor(c.r, c.g, c.b)
-	R := 12
-	for r := 1; r < R; r++ {
-		pdf.Oval(sX, sY-0.5*float64(r), sX+float64(r), sY+0.5*float64(r)) // Assume horizontal line for arrow
-	}
+	// r := 12
+	drawCircle(pdf, sX, sY, r, c)
+
+}
+
+// arrow Head point to right position
+func drawToRightArrow(pdf *gopdf.GoPdf, sX, sY, L float64, c color, r int) {
+	pdf.SetLineWidth(1.0)
+	pdf.SetStrokeColor(black.r, black.g, black.b)
+	pdf.SetFillColor(black.r, black.g, black.b)
+
+	pdf.Line(sX, sY, sX+L, sY)
+	pdf.Polygon(arrowHead(gopdf.Point{X: sX + L, Y: sY}, gopdf.Point{X: sX, Y: sY}), "DF")
+
+	// Draw circle
+	// r := 12
+	drawCircle(pdf, sX+L-float64(r), sY, r, c)
 
 }
 
