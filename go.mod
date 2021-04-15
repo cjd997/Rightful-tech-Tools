@@ -3,6 +3,7 @@ module github.com/cjd997/Rightful-tech-Tools
 go 1.15
 
 require (
+	github.com/aws/aws-sdk-go v1.38.20
 	github.com/flopp/go-findfont v0.0.0-20201114153133-e7393a00c15b
 	github.com/gofiber/fiber/v2 v2.6.0
 	github.com/signintech/gopdf v0.9.13

@@ -14,9 +14,6 @@ func (s *Server) generateHandler(ctx *fiber.Ctx) error {
 		return fmt.Errorf("error parsing request data: %s", err.Error())
 	}
 
-	// TODO remove later
-	fmt.Println(req)
-
 	err = chart.Generate(req)
 	if err != nil {
 		return err
