@@ -1,0 +1,8 @@
+[server]
+port = ":8080"
+files_folder = "files"
+
+[upload]
+bucket  = "storage_bucket"
+key     = "storage_key"
+timeout = 30

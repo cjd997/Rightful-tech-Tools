@@ -2,6 +2,9 @@ package chart
 
 import (
 	"fmt"
+	"time"
+	"math/rand"
+	"path/filepath"
 
 	"github.com/signintech/gopdf"
 )
@@ -12,11 +15,28 @@ type Request struct {
 	Cost      float64 `json:"cost"`
 }
 
-func Generate(req []Request) error {
-	return generate()
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func init() {
+    rand.Seed(time.Now().UnixNano())
 }
 
-func generate() error {
+func randomString() string {
+    b := make([]rune, 10)
+    for i := range b {
+        b[i] = letterRunes[rand.Intn(len(letterRunes))]
+    }
+    return string(b)
+}
+
+func Generate(req []Request, filesFolder string) (string, error) {
+	// generate filename
+	filename := randomString() + ".pdf"
+	filePath := filepath.Join(filesFolder, filename)
+	return generate(filePath)
+}
+
+func generate(filePath string) (string, error) {
 	pageSize := gopdf.PageSizeA4
 
 	pdf := &gopdf.GoPdf{}
@@ -32,12 +52,12 @@ func generate() error {
 	// Draw text
 	err := pdf.AddTTFFont(font("Poppins", "Poppins-Regular"))
 	if err != nil {
-		return fmt.Errorf("error adding font: %s", err.Error())
+		return "", fmt.Errorf("error adding font: %s", err.Error())
 	}
 
 	err = pdf.SetFont("Poppins", "", 10)
 	if err != nil {
-		return fmt.Errorf("error setting font: %s", err.Error())
+		return "", fmt.Errorf("error setting font: %s", err.Error())
 	}
 	pdf.SetX(80 + 35 + 0)
 	pdf.SetY(30)
@@ -57,10 +77,10 @@ from or given leave to intervene.`, 150)
 		pdf.SetY(30.0 + float64(i+1)*12.0)
 	}
 
-	err = pdf.WritePdf("hello.pdf")
+	err = pdf.WritePdf(filePath)
 	if err != nil {
-		return fmt.Errorf("error writing chart to pdf file: %s", err.Error())
+		return "", fmt.Errorf("error writing chart to pdf file: %s", err.Error())
 	}
 
-	return nil
+	return filePath, nil
 }
